@@ -23,8 +23,6 @@ class TetrisEnv(gym.Env):
         6: hold
     """
     def step(self, action):
-        last_obs = np.array(self.controller.get_state(), dtype=np.float32)
-        last_obs = last_obs[6:, :]
         reward = 0
         landed = False
         fire = 0
@@ -45,30 +43,16 @@ class TetrisEnv(gym.Env):
             fire = reward
             if reward > 0:
                 reward += 2
-            # punishment for making holes
             if landed:
                 if perfect_landed:
                     reward += 1
                 
                 height = self.controller.highest()
                 reward -= height * 0.01
-                # holes = self.controller.hole_columns_at(column_list)
-                # reward -= holes * 0.1
-                # rewards if landed without holes
-                #if holes == 0:
-                    #reward += 0.3
-                # punishment for the height of the stack
-                # height = self.controller.highest()
-                # reward -= height * 0.1
         elif action == 6:
             self.controller.hold()
         
-        obs = np.array(self.controller.get_state(), dtype=np.float16)
-        """
-        field_part = obs[6:, :]
-        if (field_part == last_obs).all() and (landed != True):
-            reward -= 0.2
-        """
+        obs = np.array(self.controller.get_state(), dtype=np.float32)
 
         is_done = self.controller.gameover
 
@@ -78,9 +62,7 @@ class TetrisEnv(gym.Env):
     def reset(self):
         self.controller.reset()
         obs = np.array(self.controller.get_state(), dtype=np.float32)
-        obs = np.expand_dims(obs, axis=0)
         return obs
-        #return self.controller.get_state()
 
     def render(self, mode='human'):
         pass
